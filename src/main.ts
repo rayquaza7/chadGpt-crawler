@@ -63,4 +63,4 @@ const crawler = new PlaywrightCrawler({
 });
 
 // Add first URL to the queue and start the crawl.
-await crawler.run(["https://www.ubc.ca/"]);
+// await crawler.run(["https://www.ubc.ca/"]);
