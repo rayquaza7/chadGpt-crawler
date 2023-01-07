@@ -52,6 +52,8 @@ const crawler = new PlaywrightCrawler({
         if (req.url.match(/recreation/)) return false;
         // ignore all links if they have the word 'give' in them
         if (req.url.match(/give/)) return false;
+        // ignore library links
+        if (req.url.match(/library/)) return false;
         return req;
       },
     });
@@ -61,4 +63,4 @@ const crawler = new PlaywrightCrawler({
 });
 
 // Add first URL to the queue and start the crawl.
-// await crawler.run(["https://www.ubc.ca/"]);
+await crawler.run(["https://www.ubc.ca/"]);
