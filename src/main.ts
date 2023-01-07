@@ -1,43 +1,41 @@
-// For more information, see https://crawlee.dev/
-import { PlaywrightCrawler, EnqueueStrategy } from "crawlee";
+import { EnqueueStrategy, PuppeteerCrawler } from "crawlee";
 import PG from "pg";
 
-const pool = new PG.Pool();
+const client = new PG.Client();
+await client.connect();
 
 // PlaywrightCrawler crawls the web using a headless
 // browser controlled by the Playwright library.
-const crawler = new PlaywrightCrawler({
+const crawler = new PuppeteerCrawler({
   // Use the requestHandler to process each of the crawled pages.
   async requestHandler({ request, page, enqueueLinks, log }) {
-    const client = await pool.connect();
-
     const title = await page.title();
-    const text = await page.innerText("body");
-    log.info(`Title of ${request.loadedUrl} is '${title}'`);
-    // check if the url is already in the database
-    const res = await client.query("SELECT * FROM crawl_data WHERE url = $1", [
-      request.loadedUrl,
-    ]);
-    if (res.rowCount > 0) {
-      console.log("Already in database", request.loadedUrl);
-    } else {
-      try {
-        await client.query(
-          "INSERT INTO crawl_data (url, title, data, company_id) VALUES ($1, $2, $3, $4)",
-          [request.loadedUrl, title, text, 1]
-        );
-      } catch (e) {
-        console.log(
-          "Could not add to database",
-          e,
-          request.loadedUrl,
-          title,
-          text,
-          1
-        );
+    // get all text from p tags
+    const text = await page.evaluate(() => {
+      const elements = document.querySelectorAll("p");
+      const text = [];
+      for (let i = 0; i < elements.length; i++) {
+        text.push(elements[i].innerText);
       }
+      return text;
+    });
+    log.info(`Crawled ${request.loadedUrl} (title: ${title})`);
+
+    try {
+      await client.query(
+        "INSERT INTO crawl_data (url, title, data, company_id) VALUES ($1, $2, $3, $4)",
+        [request.loadedUrl, title, text, 1]
+      );
+    } catch (e) {
+      console.log(
+        "Could not add to database",
+        e,
+        request.loadedUrl,
+        title,
+        text,
+        1
+      );
     }
-    client.release();
 
     // Extract links from the current page
     // and add them to the crawling queue.
@@ -54,13 +52,15 @@ const crawler = new PlaywrightCrawler({
         if (req.url.match(/give/)) return false;
         // ignore library links
         if (req.url.match(/library/)) return false;
+        // ignnore .ok subdomains
+        if (req.url.match(/.ok/)) return false;
         return req;
       },
     });
   },
-  // Uncomment this option to see the browser window.
-  // headless: false,
 });
 
 // Add first URL to the queue and start the crawl.
-// await crawler.run(["https://www.ubc.ca/"]);
+await crawler.run([
+  "https://courses.students.ubc.ca/cs/courseschedule?pname=subjarea&tname=subj-all-departments",
+]);

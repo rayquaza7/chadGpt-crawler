@@ -5,9 +5,9 @@
   "description": "This is an example of a Crawlee project.",
   "dependencies": {
     "crawlee": "^3.0.0",
-    "dotenv": "^16.0.3",
     "pg": "^8.8.0",
-    "playwright": "*"
+    "playwright": "*",
+    "puppeteer": "^19.4.1"
   },
   "devDependencies": {
     "@apify/tsconfig": "^0.1.0",
