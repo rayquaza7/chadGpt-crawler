@@ -48,6 +48,10 @@ const crawler = new PlaywrightCrawler({
         if (req.url.endsWith(".pdf")) return false;
         // ignore all links that have date in the, e.g. /2021/01/01/
         if (req.url.match(/\/\d{4}\/\d{2}\/\d{2}\//)) return false;
+        // ignore all links if they have the word 'recreation' in them
+        if (req.url.match(/recreation/)) return false;
+        // ignore all links if they have the word 'give' in them
+        if (req.url.match(/give/)) return false;
         return req;
       },
     });
