@@ -54,13 +54,26 @@ const crawler = new PuppeteerCrawler({
         if (req.url.match(/library/)) return false;
         // ignnore .ok subdomains
         if (req.url.match(/.ok/)) return false;
+        // ignore all links if they have the word 'calendar' in them
+        if (req.url.match(/calendar/)) return false;
+        // ignore all links if they have the word 'news' in them
+        if (req.url.match(/news/)) return false;
+        // ignore all links if they have the word 'events' in them
+        if (req.url.match(/events/)) return false;
+        // ignore all links if they have the word 'courses' in them
+        if (req.url.match(/courses/)) return false;
+        // ignore all links if they have the word 'blog' in them
+        if (req.url.match(/blog/)) return false;
+        // ignore if they have year and month in them
+        if (req.url.match(/\/\d{4}\/\d{2}\//)) return false;
         return req;
       },
     });
   },
 });
 
-// Add first URL to the queue and start the crawl.
-await crawler.run([
-  "https://courses.students.ubc.ca/cs/courseschedule?pname=subjarea&tname=subj-all-departments",
-]);
+// // Add first URL to the queue and start the crawl.
+// await crawler.run([
+//   // "https://courses.students.ubc.ca/cs/courseschedule?pname=subjarea&tname=subj-all-departments",
+//   "https://www.ubc.ca/",
+// ]);
